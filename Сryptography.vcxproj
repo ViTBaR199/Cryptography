@@ -127,7 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EncryptionConversion.cpp" />
+    <ClCompile Include="IGeneratingRoundKeys.cpp" />
     <ClCompile Include="Сryptography.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EncryptionConversion.h" />
+    <ClInclude Include="IGeneratingRoundKeys.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

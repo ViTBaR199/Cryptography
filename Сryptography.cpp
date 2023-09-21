@@ -1,4 +1,6 @@
 ﻿#include <iostream>
+#include "IGeneratingRoundKeys.h"
+#include "EncryptionConversion.h"
 
 //первый номер
 unsigned char* P_block(unsigned char* arr1, unsigned char* arr2, const int size_perm) {
@@ -39,18 +41,18 @@ int main()
     unsigned char arr_k[] = { '0', '1', '0' };
 
     //проверка первой функции
-    unsigned char* last_check = P_block(arr1, arr2, size);
-    for (int i = 0; i < sizeof(last_check); i++)
-    {
-        std::cout << last_check[i];
-    }
-    std::cout << std::endl;
+    //unsigned char* last_check = P_block(arr1, arr2, size);
+    //for (int i = 0; i < sizeof(last_check); i++)
+    //{
+    //    std::cout << last_check[i];
+    //}
+    //std::cout << std::endl;
 
-    //проверка второй функции
-    unsigned char* ultra_last_check = S_block(arr1, arr_k, k);
-    for (int i = 0; i < sizeof(last_check); i++)
-    {
-        std::cout << ultra_last_check[i];
-    }
+    ////проверка второй функции
+    //unsigned char* ultra_last_check = S_block(arr1, arr_k, k);
+    //for (int i = 0; i < sizeof(last_check); i++)
+    //{
+    //    std::cout << ultra_last_check[i];
+    //}
 
 }
