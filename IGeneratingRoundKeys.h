@@ -6,6 +6,6 @@ class IGeneratingRoundKeys
 public:
 	virtual unsigned char** GenKey(unsigned char* key) = 0;
 	IGeneratingRoundKeys();
-	~IGeneratingRoundKeys();
+	virtual ~IGeneratingRoundKeys();
 };
 

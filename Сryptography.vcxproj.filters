@@ -24,12 +24,18 @@
     <ClCompile Include="EncryptionConversion.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="ISymmetricAlgorithm.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IGeneratingRoundKeys.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="EncryptionConversion.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="ISymmetricAlgorithm.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

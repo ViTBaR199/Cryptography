@@ -6,6 +6,6 @@ class IEncryptionConversion
 public:
 	virtual unsigned char* Conversion(unsigned char* block) = 0;
 	IEncryptionConversion();
-	~IEncryptionConversion();
+	virtual ~IEncryptionConversion();
 };
 
