@@ -1,15 +1,16 @@
 ﻿#include <iostream>
+#include <bitset>
 #include "IGeneratingRoundKeys.h"
 #include "EncryptionConversion.h"
 
 
-const unsigned int pBlock[4][8] = { 
-    {16, 7, 20, 21, 29, 12, 28, 17}, 
-    {1, 15, 23, 26, 5, 18, 31, 10},
-    {2, 8, 24, 14, 32, 27, 3, 9},
-    {19, 13, 30, 6, 22, 11, 4, 25} };
+unsigned int pBlock[32] = {
+    16, 7, 20, 21, 29, 12, 28, 17, 1, 15, 23, 26, 5, 18, 31, 10,
+    2, 8, 24, 14, 32, 27, 3, 9, 19, 13, 30, 6, 22, 11, 4, 25
+};
 
-const unsigned int sBlock[8][4][16] =
+
+unsigned int sBlock[8][4][16] =
 {
     {
         {14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7},
@@ -89,103 +90,64 @@ unsigned char* P_block(unsigned char array[], const unsigned int pBlock[][8]) {
     return newArray;
 }
 
-//второй номер
-//unsigned char finding_the_bit(unsigned char block_bite, unsigned char line_bite,
-//    unsigned char column_bite, const unsigned int s_arr[][4][16]) {
-//    for (int nblock = 0; nblock < 8; nblock++)
-//    {
-//        if ((nblock == block_bite / 6) || (block_bite == 0))
-//        {
-//            for (int nline = 0; nline < 4; nline++)
-//            {
-//                if (nline == line_bite)
-//                {
-//                    for (int ncolumn = 0; ncolumn < 16; ncolumn++)
-//                    {
-//                        if (ncolumn == column_bite)//изменить условие
-//                        {
-//                            return s_arr[(int)nblock][(int)nline][(int)ncolumn];
-//                        }
-//                    }
-//                }
-//                else
-//                    continue;
-//            }
-//        }
-//        else
-//            continue;
-//    }
-//}
-//
-//unsigned char* S_block(unsigned char* arr1, const unsigned int s_arr[][4][16], int size_k) {
-//    unsigned char middle;
-//    unsigned char first_last;
-//    unsigned char* new_arr = new unsigned char[size_k];
-//
-//    int index = 0;
-//    for (int i = 0; i < size_k; i += 6) {
-//        middle = 0;
-//        first_last = 0;
-//        first_last = ((arr1[i] & 1) << 1) | (arr1[i + 5] & 1);
-//        for (int j = 1; j <= 4; j++)
-//        {
-//            middle <<= 1;
-//            middle |= arr1[i + j] & 1;
-//        }
-//
-//        new_arr[i / 6] = finding_the_bit(i, first_last, middle, s_arr);
-//    }
-//
-//    return new_arr;
-//}
+//1
+std::bitset<32> p_permuntation(std::bitset<32> inputArray, unsigned int pBlock[]) {
+    std::bitset<32> outputArray;
 
-unsigned char* S_block(unsigned char array[], const unsigned int sBlock[][4][16]) {
-    unsigned char newArray[8] = {};
-
-    for (int i = 0; i < 8; i += 2) {
-        unsigned char block1 = array[i];
-        unsigned char block2 = array[i + 1];
-        int line1 = ((block1 & 0x20) >> 4) | (block1 & 0x01); // первый и последний биты
-        int column1 = (block1 & 0x1E) >> 1; // оставшиеся четыре бита
-        int line2 = ((block2 & 0x20) >> 4) | (block2 & 0x01); // первый и последний биты
-        int column2 = (block2 & 0x1E) >> 1; // оставшиеся четыре бита
-        newArray[i / 2] = (sBlock[i/2][line1][column1] << 4) | sBlock[i/2][line2][column2];
+    for (int i = 0; i < 32; i++) {
+        unsigned char bits = pBlock[i] - 1;
+        outputArray[i] = inputArray[(int)bits];
     }
-    return newArray;
+    return outputArray;
+}
+
+std::bitset<4> block_search(int block, std::bitset<2> line, std::bitset<4> column, unsigned int sBlock[][4][16]) {
+    for (int i = 0, j = 0; i < 4, j < 16; ) {
+        if (((std::bitset<2>)i != line) && (std::bitset<4>)j != column) {
+            i++;
+            j++;
+        }
+        else if ((std::bitset<2>)i != line) {
+            i++;
+        }
+        else if ((std::bitset<4>)j != column) {
+            j++;
+        }
+        else {
+            return (std::bitset<4>)sBlock[block][i][j];
+        }
+    }
+}
+
+//2
+std::bitset<32> s_permuntation(std::bitset<48> inputArray, unsigned int sBlock[][4][16]) {
+    std::bitset<4> blockArray;
+    std::bitset<32> outputArray;
+
+    for (int first = 0, i = 0; i < 8; i++, first += 6) {
+        //inputArray[i+1]
+        blockArray = block_search(i,
+            (inputArray[first] | (inputArray[first + 5] << 1)),
+            (inputArray[first + 1] | (inputArray[first + 2] << 1) | (inputArray[first + 3] << 2) | (inputArray[first + 4] << 3)),
+            sBlock);
+
+        for (int j = 0; j < blockArray.size(); j++)
+        {
+            outputArray |= (blockArray[j] << (j + (4 * i)));
+        }
+
+        //std::cout << nline << std::endl;
+    }
+    return outputArray;
 }
 
 int main()
 {
-    //для 1-го задания
-    const int size = 8;
-    /*unsigned char arr1[] = { '1', '0', '1', '1', '0', '1', '0', '1' };*/
-    unsigned char arr1[] = { 0b10011110, 0b11100111, 0b00011110,
-        0b10111110, 0b01010011, 0b10011010 };
+    /*std::bitset<32> array_of_bits{"10101110001101010101110001101011"};
 
-    //unsigned char arr2[] = { '6', '4', '3', '0', '1', '7', '2', '5' };
-    
-    //для 2-го задания
-    char k = '3';
-    unsigned char arr_k[] = { '0', '1', '0' };
+    std::cout << p_permuntation(array_of_bits, pBlock) << '\n';*/
 
-    ////проверка первой функции
-    //unsigned char* newArray = P_block(arr1, pBlock);
-    //for (int i = 0; i < 4; i++)
-    //{
-    //    std::cout << (int)newArray[i] << std::endl;
-    //}
-    //delete[] newArray;
+    std::bitset<48> array_of_bits{ "101011100011010101011100011010111011011101011110" };
 
-    //проверка второй функции
-    unsigned char* ultra_last_check = S_block(arr1, sBlock);
-    for (int i = 0; i < sizeof(ultra_last_check); i++)
-    {
-        std::cout << (int)ultra_last_check[i] << std::endl;
-    }
-
-
-    /*for (int i = 0; i < sizeof(arr1); i++)
-    {
-        std::cout << (int)arr1[i] << std::endl;
-    }*/
+    std::cout << s_permuntation(array_of_bits, sBlock) << '\n';
 }
