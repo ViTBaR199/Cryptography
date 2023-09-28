@@ -1,10 +1,11 @@
-#include "EncryptionConversion.h"
+#pragma once
+#include <iostream>
+#include <bitset>
 
-
-IEncryptionConversion::IEncryptionConversion()
+class IEncryptionConversion
 {
-}
-
-IEncryptionConversion::~IEncryptionConversion()
-{
-}
+public:
+    virtual std::bitset<8> Conversion(std::bitset<8> block) = 0;
+    IEncryptionConversion() {};
+    virtual ~IEncryptionConversion() {};
+};

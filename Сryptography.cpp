@@ -1,8 +1,8 @@
 ﻿#include <iostream>
 #include <bitset>
-#include "IGeneratingRoundKeys.h"
-#include "EncryptionConversion.h"
-
+#include "IGeneratingRoundKeys.cpp"
+#include "EncryptionConversion.cpp"
+#include "ISymmetricAlgorithm.cpp"
 
 unsigned int pBlock[32] = {
     16, 7, 20, 21, 29, 12, 28, 17, 1, 15, 23, 26, 5, 18, 31, 10,

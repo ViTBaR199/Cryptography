@@ -1,8 +1,12 @@
-#include "ISymmetricAlgorithm.h"
+#pragma once
+#include <iostream>
+#include <bitset>
 
-ISymmetricAlgorithm::ISymmetricAlgorithm()
+class ISymmetricAlgorithm
 {
-}
-ISymmetricAlgorithm::~ISymmetricAlgorithm()
-{
-}
+public:
+    virtual std::bitset<8> SymAlg(std::bitset<8> block, std::bitset<8> key) = 0;
+    ISymmetricAlgorithm() {};
+    virtual ~ISymmetricAlgorithm() {};
+};
+
