@@ -21,7 +21,7 @@
     <ClCompile Include="IGeneratingRoundKeys.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="EncryptionConversion.cpp">
+    <ClCompile Include="IEncryptionConversion.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="ISymmetricAlgorithm.cpp">

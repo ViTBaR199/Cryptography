@@ -1,16 +1,15 @@
 ﻿#include <iostream>
 #include <bitset>
 #include "IGeneratingRoundKeys.cpp"
-#include "EncryptionConversion.cpp"
+#include "IEncryptionConversion.cpp"
 #include "ISymmetricAlgorithm.cpp"
 
-unsigned int pBlock[32] = {
+uint8_t pBlock[32] = {
     16, 7, 20, 21, 29, 12, 28, 17, 1, 15, 23, 26, 5, 18, 31, 10,
     2, 8, 24, 14, 32, 27, 3, 9, 19, 13, 30, 6, 22, 11, 4, 25
 };
 
-
-unsigned int sBlock[8][4][16] =
+uint8_t sBlock[8][4][16] =
 {
     {
         {14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7},
@@ -63,35 +62,22 @@ unsigned int sBlock[8][4][16] =
 };
 
 
-//первый номер
-//unsigned char* P_block(unsigned char* arr1, unsigned char* arr2, const int size_perm) {
-//    unsigned char* new_arr = new unsigned char[size_perm];
-//    for (int i = 0; i < size_perm; i++) {
-//        int index = arr2[i] - '0';
-//        char temp = arr1[i];
-//        new_arr[i] = arr1[index];
-//    }
-//    return new_arr;
-//}
-
-unsigned char* P_block(unsigned char array[], const unsigned int pBlock[][8]) {
-    unsigned char* newArray = new unsigned char[4] {0, 0, 0, 0};
-
-    for (int i = 0; i < 4; i++){
-        for (int j = 0; j < 8; j++) {
-            int bitIndex = pBlock[i][j];
-            int byteIndex = bitIndex / 8;
-            int offset = bitIndex % 8;
-
-            unsigned char bit = (array[byteIndex] >> offset) & 1;
-            newArray[i] |= (bit << j);  
-        }
-    }
-    return newArray;
-}
+//определение перестановки расширенного ключа
+uint8_t CD1[]{
+    57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18,
+    10, 2, 59, 51, 43, 35, 27, 19, 11, 3, 60, 52, 44, 36,
+    63, 55, 47, 39, 31, 23, 15, 7, 62, 54, 46, 38, 30, 22,
+    14, 6, 61, 53, 45, 37, 29, 21, 13, 5, 28, 20, 12, 4
+};
+//ключ ki выбирается из перечисленных битов
+uint8_t CDi[]{
+    14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10, 23, 19, 12, 4,
+    26, 8, 16, 7, 27, 20, 13, 2, 41, 52, 31, 37, 47, 55, 30, 40,
+    51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32
+};
 
 //1
-std::bitset<32> p_permuntation(std::bitset<32> inputArray, unsigned int pBlock[]) {
+std::bitset<32> p_permuntation(std::bitset<32> inputArray, uint8_t pBlock[]) {
     std::bitset<32> outputArray;
 
     for (int i = 0; i < 32; i++) {
@@ -99,9 +85,19 @@ std::bitset<32> p_permuntation(std::bitset<32> inputArray, unsigned int pBlock[]
         outputArray[i] = inputArray[(int)bits];
     }
     return outputArray;
-}
+};
 
-std::bitset<4> block_search(int block, std::bitset<2> line, std::bitset<4> column, unsigned int sBlock[][4][16]) {
+std::bitset<64> p_permuntation(uint8_t* inputArray, std::bitset<64>* pBlock) {
+    std::bitset<64> outputArray;
+
+    for (int i = 0; i < 64; i++)
+    {
+        outputArray[i] = pBlock[inputArray[i] - 1].to_ullong();
+    }
+    return outputArray;
+};
+
+std::bitset<4> block_search(int block, std::bitset<2> line, std::bitset<4> column, uint8_t sBlock[][4][16]) {
     for (int i = 0, j = 0; i < 4, j < 16; ) {
         if (((std::bitset<2>)i != line) && (std::bitset<4>)j != column) {
             i++;
@@ -117,10 +113,10 @@ std::bitset<4> block_search(int block, std::bitset<2> line, std::bitset<4> colum
             return (std::bitset<4>)sBlock[block][i][j];
         }
     }
-}
+};
 
 //2
-std::bitset<32> s_permuntation(std::bitset<48> inputArray, unsigned int sBlock[][4][16]) {
+std::bitset<32> s_permuntation(std::bitset<48> inputArray, uint8_t sBlock[][4][16]) {
     std::bitset<4> blockArray;
     std::bitset<32> outputArray;
 
@@ -139,7 +135,26 @@ std::bitset<32> s_permuntation(std::bitset<48> inputArray, unsigned int sBlock[]
         //std::cout << nline << std::endl;
     }
     return outputArray;
-}
+};
+
+//реализация генерации раундовых ключей
+class GeneratingRoundKeys : IGeneratingRoundKeys {
+private:
+    static std::bitset<64> CyclBitShift[]; //таблица битов циклического сдвига
+
+public:
+    std::bitset<64>* GenKey(std::bitset<64>* key) {
+        std::bitset<64>* roundKeys = new std::bitset<64>[16];
+        auto permuntKey = p_permuntation(CD1, key);
+        //...не закончил
+    }
+
+};
+
+std::bitset<64> GeneratingRoundKeys::CyclBitShift[] = {
+        {1}, {1}, {2}, {2}, {2}, {2}, {2}, {2}, {1}, {2}, {2}, {2}, {2}, {2}, {2}, {1}
+};
+
 
 int main()
 {
