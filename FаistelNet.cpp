@@ -57,15 +57,5 @@ public:
         roundKey = keyGen->GenKey(key);
     }
 
-    virtual std::bitset<64> SymAlg(std::bitset<64> block, std::bitset<64> key) override
-    {
-        std::bitset<64>* roundKeys = keyGen->GenKey(key);
-
-        // Здесь должна быть сама реализация,
-        // предположительно...
-        // ...
-
-        return block;
-    }
 };
 

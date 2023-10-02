@@ -5,8 +5,8 @@
 #include "ISymmetricAlgorithm.cpp"
 
 uint8_t pBlock[32] = {
-    16, 7, 20, 21, 29, 12, 28, 17, 1, 15, 23, 26, 5, 18, 31, 10,
-    2, 8, 24, 14, 32, 27, 3, 9, 19, 13, 30, 6, 22, 11, 4, 25
+    15, 6, 19, 20, 28, 11, 27, 16, 0, 14, 22, 25, 4, 17, 30, 9,
+    1, 7, 23, 13, 31, 26, 2, 8, 18, 12, 29, 5, 21, 10, 3, 24
 };
 
 uint8_t sBlock[8][4][16] =
@@ -63,36 +63,29 @@ uint8_t sBlock[8][4][16] =
 
 
 //определение перестановки расширенного ключа
-uint8_t CD1[]{
+uint8_t C1[28]{
     57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18,
-    10, 2, 59, 51, 43, 35, 27, 19, 11, 3, 60, 52, 44, 36,
+    10, 2, 59, 51, 43, 35, 27, 19, 11, 3, 60, 52, 44, 36
+};
+
+uint8_t D1[28]{
     63, 55, 47, 39, 31, 23, 15, 7, 62, 54, 46, 38, 30, 22,
     14, 6, 61, 53, 45, 37, 29, 21, 13, 5, 28, 20, 12, 4
 };
 //ключ ki выбирается из перечисленных битов
 uint8_t CDi[]{
-    14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10, 23, 19, 12, 4,
-    26, 8, 16, 7, 27, 20, 13, 2, 41, 52, 31, 37, 47, 55, 30, 40,
-    51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32
+    13, 16, 10, 23, 0, 4, 2, 27, 14, 5, 20, 9, 22, 18, 11, 3,
+    25, 7, 15, 6, 26, 19, 12, 1, 40, 51, 30, 36, 46, 54, 29, 39,
+    50, 44, 32, 47, 43, 48, 38, 55, 33, 52, 45, 41, 49, 35, 28, 31
 };
 
 //1
-std::bitset<32> p_permuntation(std::bitset<32> inputArray, uint8_t pBlock[]) {
-    std::bitset<32> outputArray;
+template <size_t T, size_t N>
+std::bitset<T> p_permuntation(std::bitset<N> inputArray, uint8_t (&pBlock)[T]) {
+    std::bitset<T> outputArray;
 
-    for (int i = 0; i < 32; i++) {
-        unsigned char bits = pBlock[i] - 1;
-        outputArray[i] = inputArray[(int)bits];
-    }
-    return outputArray;
-};
-
-std::bitset<64> p_permuntation(uint8_t* inputArray, std::bitset<64>* pBlock) {
-    std::bitset<64> outputArray;
-
-    for (int i = 0; i < 64; i++)
-    {
-        outputArray[i] = pBlock[inputArray[i] - 1].to_ullong();
+    for (int i = 0; i < T; i++) {
+        outputArray[i] = inputArray[(int)pBlock[i]];
     }
     return outputArray;
 };
@@ -140,19 +133,28 @@ std::bitset<32> s_permuntation(std::bitset<48> inputArray, uint8_t sBlock[][4][1
 //реализация генерации раундовых ключей
 class GeneratingRoundKeys : IGeneratingRoundKeys {
 private:
-    static std::bitset<64> CyclBitShift[]; //таблица битов циклического сдвига
+    static uint8_t CyclBitShift[]; //таблица битов циклического сдвига
 
 public:
-    std::bitset<64>* GenKey(std::bitset<64>* key) {
-        std::bitset<64>* roundKeys = new std::bitset<64>[16];
-        auto permuntKey = p_permuntation(CD1, key);
-        //...не закончил
-    }
+    std::bitset<48>* GenKey(std::bitset<64> key) {
+        std::bitset<48>* roundKeys = new std::bitset<48>[16];
+        auto permuntKeyC = p_permuntation<sizeof(C1)>(key, C1);
+        auto permuntKeyD = p_permuntation<sizeof(D1)>(key, D1);
 
+        for (int round = 0; round < 16; round++){
+            auto shift = CyclBitShift[round];
+            permuntKeyC = (permuntKeyC << shift) | (permuntKeyC >> (28 - shift));
+            permuntKeyD = (permuntKeyD << shift) | (permuntKeyD >> (28 - shift));
+
+            std::bitset<56> keyCD = ((permuntKeyD.to_ullong()) << 28) | permuntKeyC.to_ullong();
+            roundKeys[round] = p_permuntation<sizeof(CDi)>(keyCD, CDi);
+        }
+        return roundKeys;
+    }
 };
 
-std::bitset<64> GeneratingRoundKeys::CyclBitShift[] = {
-        {1}, {1}, {2}, {2}, {2}, {2}, {2}, {2}, {1}, {2}, {2}, {2}, {2}, {2}, {2}, {1}
+uint8_t GeneratingRoundKeys::CyclBitShift[] = {
+    1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
 };
 
 
@@ -160,9 +162,24 @@ int main()
 {
     /*std::bitset<32> array_of_bits{"10101110001101010101110001101011"};
 
-    std::cout << p_permuntation(array_of_bits, pBlock) << '\n';*/
+    std::cout << p_permuntation<32>(array_of_bits, pBlock, sizeof(pBlock)) << '\n';*/
 
-    std::bitset<48> array_of_bits{ "101011100011010101011100011010111011011101011110" };
+    /*std::bitset<48> array_of_bits{ "101011100011010101011100011010111011011101011110" };
 
-    std::cout << s_permuntation(array_of_bits, sBlock) << '\n';
+    std::cout << s_permuntation(array_of_bits, sBlock) << '\n';*/
+
+    /*std::bitset<64> array_of_bits{ "1010111000110101010111000110101001001011000101001110101111111100" };
+
+    std::cout << p_permuntation<28>(array_of_bits, C1) << '\n';*/
+
+    GeneratingRoundKeys gen;
+    std::bitset<64> key{ "1010111000110101010111000110101001001011000101001110101111111100" };
+    auto roundKeys = gen.GenKey(key);
+    for (int i = 0; i < 16; i++) {
+        std::cout << "Round " << i + 1 << ": " << roundKeys[i] << '\n';
+    }
+
+    delete[] roundKeys;
+    return 0;
+    
 }
