@@ -3,6 +3,7 @@
 #include "IGeneratingRoundKeys.cpp"
 #include "IEncryptionConversion.cpp"
 #include "ISymmetricAlgorithm.cpp"
+#include "IFаistelNet.cpp"
 
 uint8_t pBlock[32] = {
     15, 6, 19, 20, 28, 11, 27, 16, 0, 14, 22, 25, 4, 17, 30, 9,
@@ -171,6 +172,7 @@ uint8_t GeneratingRoundKeys::CyclBitShift[] = {
 };
 
 
+
 //реализация шифрующего преобразования
 class EncryptionConversion : IEncryptionConversion {
 public:
@@ -186,21 +188,80 @@ public:
 
 
 
+class FeistelNet : public IFeistelNet
+{
+private:
+    EncryptionConversion* conversion;
+    GeneratingRoundKeys* keyGen;
+
+public:
+    FeistelNet(EncryptionConversion* conv, GeneratingRoundKeys* kg) {
+        this->conversion = conv;
+        this->keyGen = kg;
+    }
+
+    virtual ~FeistelNet()
+    {
+        delete conversion;
+        delete keyGen;
+    }
+
+
+    std::bitset<64> Encrypt(std::bitset<64> inputBlock, std::bitset<64> key) {
+        uint32_t left = inputBlock.to_ullong() >> 32;
+        uint32_t right = inputBlock.to_ullong() & ((1ULL << 32) - 1);    //1ULL - unsigned long long
+        uint32_t nleft = 0, nright = 0;
+        auto roundKey = keyGen->GenKey(key);
+
+        for (int count_round = 0; count_round < 16; count_round++) {
+            nleft = right;
+            nright = left ^ conversion->Conversion(right, roundKey[count_round]).to_ullong();
+            left = nleft;
+            right = nright;
+        }
+
+        std::bitset<64> outBlock((uint64_t(nleft) << 32) | nright);
+        return outBlock;
+    }
+
+    std::bitset<64> Decrypt(std::bitset<64> inputBlock, std::bitset<64> key) {
+        uint32_t left = inputBlock.to_ullong() >> 32;
+        uint32_t right = inputBlock.to_ullong() & ((1ULL << 32) - 1);
+        uint32_t nleft = 0, nright = 0;
+        auto roundKey = keyGen->GenKey(key);
+
+        for (int count_round = 15; count_round >= 0; count_round--) {
+            nright = left;
+            nleft = right ^ conversion->Conversion(left, roundKey[count_round]).to_ullong();
+            left = nleft;
+            right = nright;
+        }
+
+        std::bitset<64> outBlock((uint64_t(nleft) << 32) | nright);
+        return outBlock;
+    }
+};
+
+
+
 int main()
 {
     /*std::bitset<32> array_of_bits{"10101110001101010101110001101011"};
 
     std::cout << p_permuntation<32>(array_of_bits, pBlock, sizeof(pBlock)) << '\n';*/
 
+
     /*std::bitset<48> array_of_bits{ "101011100011010101011100011010111011011101011110" };
 
     std::cout << s_permuntation(array_of_bits, sBlock) << '\n';*/
+
 
     /*std::bitset<64> array_of_bits{ "1010111000110101010111000110101001001011000101001110101111111100" };
 
     std::cout << p_permuntation<28>(array_of_bits, C1) << '\n';*/
 
-    GeneratingRoundKeys gen;
+
+    /*GeneratingRoundKeys gen;
     EncryptionConversion enc;
     std::bitset<64> key{ "1010111000110101010111000110101001001011000101001110101111111100" };
     std::bitset<32> arr{ "10100101001110101010111010101001" };
@@ -210,9 +271,13 @@ int main()
     }
 
     auto encrypt = enc.Conversion(arr, roundKeys[0]);
-    std::cout << "Encryption Conversion: " << encrypt;
+    std::cout << "Encryption Conversion: " << encrypt << std::endl;
 
-    delete[] roundKeys;
+    delete[] roundKeys;*/
+
+
+    FeistelNet test;
+
     return 0;
     
 }

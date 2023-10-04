@@ -128,7 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="IEncryptionConversion.cpp" />
-    <ClCompile Include="FаistelNet.cpp" />
+    <ClCompile Include="IFаistelNet.cpp" />
     <ClCompile Include="IGeneratingRoundKeys.cpp" />
     <ClCompile Include="ISymmetricAlgorithm.cpp" />
     <ClCompile Include="Сryptography.cpp" />

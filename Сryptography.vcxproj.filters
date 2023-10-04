@@ -27,7 +27,7 @@
     <ClCompile Include="ISymmetricAlgorithm.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="FаistelNet.cpp">
+    <ClCompile Include="IFаistelNet.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
