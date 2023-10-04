@@ -5,7 +5,7 @@
 class IEncryptionConversion
 {
 public:
-    virtual std::bitset<64> Conversion(std::bitset<64> inputBlock, std::bitset<64> block) = 0;
+    virtual std::bitset<32> Conversion(std::bitset<32> inputBlock, std::bitset<48> key) = 0;
     IEncryptionConversion() {};
     virtual ~IEncryptionConversion() {};
 };

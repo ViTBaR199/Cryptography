@@ -78,6 +78,17 @@ uint8_t CDi[]{
     25, 7, 15, 6, 26, 19, 12, 1, 40, 51, 30, 36, 46, 54, 29, 39,
     50, 44, 32, 47, 43, 48, 38, 55, 33, 52, 45, 41, 49, 35, 28, 31
 };
+//расширение E
+uint8_t ExpansionE[] = {
+    31, 0, 1, 2, 3, 4,
+    3, 4, 5, 6, 7, 8,
+    7, 8, 9, 10, 11, 12,
+    11, 12, 13, 14, 15, 16,
+    15, 16, 17, 18, 19, 20,
+    19, 20, 21, 22, 23, 24,
+    23, 24, 25, 26, 27, 28,
+    27, 28, 29, 30, 31, 0
+};
 
 //1
 template <size_t T, size_t N>
@@ -130,6 +141,8 @@ std::bitset<32> s_permuntation(std::bitset<48> inputArray, uint8_t sBlock[][4][1
     return outputArray;
 };
 
+
+
 //реализация генерации раундовых ключей
 class GeneratingRoundKeys : IGeneratingRoundKeys {
 private:
@@ -158,6 +171,21 @@ uint8_t GeneratingRoundKeys::CyclBitShift[] = {
 };
 
 
+//реализация шифрующего преобразования
+class EncryptionConversion : IEncryptionConversion {
+public:
+    std::bitset<32> Conversion(std::bitset<32> inputArray, std::bitset<48> key) {
+        auto expanBlock = p_permuntation<sizeof(ExpansionE)>(inputArray, ExpansionE);
+        auto e_block = expanBlock ^ key;
+        auto s_block = s_permuntation(e_block, sBlock);
+        auto p_block = p_permuntation<sizeof(pBlock)>(s_block, pBlock);
+        
+        return p_block;
+    }
+};
+
+
+
 int main()
 {
     /*std::bitset<32> array_of_bits{"10101110001101010101110001101011"};
@@ -173,11 +201,16 @@ int main()
     std::cout << p_permuntation<28>(array_of_bits, C1) << '\n';*/
 
     GeneratingRoundKeys gen;
+    EncryptionConversion enc;
     std::bitset<64> key{ "1010111000110101010111000110101001001011000101001110101111111100" };
+    std::bitset<32> arr{ "10100101001110101010111010101001" };
     auto roundKeys = gen.GenKey(key);
     for (int i = 0; i < 16; i++) {
         std::cout << "Round " << i + 1 << ": " << roundKeys[i] << '\n';
     }
+
+    auto encrypt = enc.Conversion(arr, roundKeys[0]);
+    std::cout << "Encryption Conversion: " << encrypt;
 
     delete[] roundKeys;
     return 0;
