@@ -188,16 +188,17 @@ public:
 
 
 
-class FeistelNet : public IFeistelNet
+class FeistelNet : public ISymmetricAlgorithm
 {
 private:
     EncryptionConversion* conversion;
     GeneratingRoundKeys* keyGen;
 
 public:
-    FeistelNet(EncryptionConversion* conv, GeneratingRoundKeys* kg) {
-        this->conversion = conv;
-        this->keyGen = kg;
+
+    FeistelNet() {
+        conversion = new EncryptionConversion();
+        keyGen = new GeneratingRoundKeys();
     }
 
     virtual ~FeistelNet()
@@ -275,9 +276,13 @@ int main()
 
     delete[] roundKeys;*/
 
-
+    std::bitset<64> arr{ "1010110010101010101010101010100101111010101001011010100100111010" };
+    std::bitset<64> key{ "1010111000110101010111000110101001001011000101001110101111111100" };
     FeistelNet test;
+    auto encrypted = test.Encrypt(arr, key);
+    auto decrypted = test.Decrypt(encrypted, key);
 
+    std::cout << "Encrypted data: " << encrypted << "\nInput array:    " << arr << "\nDecrypted data: " << decrypted << std::endl;
     return 0;
     
 }
