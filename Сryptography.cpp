@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <fstream>
 #include <bitset>
 #include "IGeneratingRoundKeys.cpp"
 #include "IEncryptionConversion.cpp"
@@ -276,13 +277,55 @@ int main()
 
     delete[] roundKeys;*/
 
-    std::bitset<64> arr{ "1010110010101010101010101010100101111010101001011010100100111010" };
+
+    /*std::bitset<64> arr{ "1010110010101010101010101010100101111010101001011010100100111010" };
     std::bitset<64> key{ "1010111000110101010111000110101001001011000101001110101111111100" };
     FeistelNet test;
     auto encrypted = test.Encrypt(arr, key);
     auto decrypted = test.Decrypt(encrypted, key);
 
-    std::cout << "Encrypted data: " << encrypted << "\nInput array:    " << arr << "\nDecrypted data: " << decrypted << std::endl;
+    std::cout << "Encrypted data: " << encrypted << "\nInput array:    " << arr << "\nDecrypted data: " << decrypted << std::endl;*/
+
+
+    std::ifstream file("Test.txt", std::ios::binary | std::ios::ate);
+    std::bitset<64> arr;
+    int byte_counter = 0;
+
+    std::bitset<64> key{ "1010111000110101010111000110101001001011000101001110101111111100" };
+
+    if (!file.is_open()) {
+        std::cout << "Failed to open file." << std::endl;
+        return 1;
+    }
+
+    std::streamsize size = file.tellg(); //размер файла в байтах
+    file.seekg(0, std::ios::beg);//возвращение в начало файла (чтобы можно было начать чтение)
+
+    uint64_t buffer;
+    while (file.read(reinterpret_cast<char*>(&buffer), sizeof(buffer))) {
+        std::bitset<64> bits(buffer);
+
+        FeistelNet test;
+
+        //создание файла и запись в него шифрования исходного файла
+        std::ofstream out_e("Encryption_result.bin", std::ios::binary | std::ios::app);
+        auto encrypted = test.Encrypt(bits, key);
+        uint64_t buffer_e = encrypted.to_ullong();
+        out_e.write(reinterpret_cast<char*>(&buffer_e), sizeof(buffer_e));
+
+
+        //создание файла и запись в него дешифрованного файла шифрования
+        std::ofstream out_d("Decryption_result.bin", std::ios::binary | std::ios::app);
+        auto decrypted = test.Decrypt(encrypted, key);
+        uint64_t buffer_d = decrypted.to_ullong();
+        out_d.write(reinterpret_cast<char*>(&buffer_d), sizeof(buffer_d));
+
+        //std::cout << bits << std::endl;
+    }
+    
+    
+
+    file.close();
     return 0;
     
 }
