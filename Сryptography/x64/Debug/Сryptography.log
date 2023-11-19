@@ -1,0 +1,5 @@
+﻿  Сryptography.cpp
+C:\Users\baran\source\repos\Сryptography\Сryptography\Сryptography.cpp(217,27): warning C4244: =: преобразование "unsigned __int64" в "uint32_t", возможна потеря данных
+C:\Users\baran\source\repos\Сryptography\Сryptography\Сryptography.cpp(234,27): warning C4244: =: преобразование "unsigned __int64" в "uint32_t", возможна потеря данных
+C:\Users\baran\source\repos\Сryptography\Сryptography\Сryptography.cpp(125): warning C4715: block_search: значение возвращается не при всех путях выполнения
+  Сryptography.vcxproj -> C:\Users\baran\source\repos\Сryptography\x64\Debug\Сryptography.exe
